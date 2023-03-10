@@ -29,7 +29,7 @@ async function handleFormSubmit(event) {
         setMessage("Invalid URL");
         return;
     }
-    let message = await deleteDomainCookie(url.hostname);
+    let message = await deleteDomainCookies(url.hostname);
     setMessage(message);
 }
 
