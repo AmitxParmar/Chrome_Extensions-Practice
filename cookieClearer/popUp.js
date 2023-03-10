@@ -5,7 +5,7 @@ const message = document.getElementById('message');
 
 
 // The async IIFE is necessary because Chrome <89 does not support top level await.
-(async function initPopupwindow() {
+(async function initPopupWindow() {
     let [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
 
     if (tab?.url) {
@@ -40,22 +40,30 @@ function stringToUrl(input) {
     } catch {
         // ignore
     }
-    // if that fails, then idk. hehe.
+    // If that fails, try assuming the provided input is an HTTP host
+    try {
+        return new URL("http://" + input);
+    } catch (e) {
+        // ignore
+    }
+    // If that fails, the idk. heh.
     return null;
+
 }
 
 async function deleteDomainCookies(domain) {
-    let cookieDelete = 0;
+    let cookiesDeleted = 0;
     try {
-        const cookie = await chrome.cookie.getAll({ domain });
+        const cookies = await chrome.cookies.getAll({ domain });
 
-        if (cookie.length === 0) {
+        if (cookies.length === 0) {
             return "No cookie found"
         }
         let pending = cookies.map(deleteCookie);
         await Promise.all(pending);
 
-        cookieDeleted = pending.length;
+        cookiesDeleted = pending.length;
+
     } catch (e) {
         return `Unexpected error: ${e.message}`;
     }
@@ -83,7 +91,7 @@ function deleteCookie(cookie) {
     return chrome.cookies.remove({
         url: cookieUrl,
         name: cookie.name,
-        stored: cookie.storeId
+        storeId: cookie.storeId
     });
 }
 
